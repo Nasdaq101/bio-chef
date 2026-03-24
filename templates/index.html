@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bio-Chef — Personalized Nutrition Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">&#x1F96C;</span>
+          <h1>Bio-Chef</h1>
+        </div>
+        <p class="tagline">Personalized Nutrition Planner</p>
+      </div>
+    </header>
+
+    <!-- main content -->
+    <main class="main">
+      <section class="card input-panel">
+        <h2>Your Health Profile</h2>
+
+        <div class="form-group">
+          <label>Daily Calorie Target</label>
+          <div class="slider-row">
+            <input type="range" id="calories" min="1200" max="4000" step="50" value="2000">
+            <span id="caloriesValue" class="slider-val">2000 kcal</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Allergies</label>
+          <div class="chip-group" id="allergyGroup">
+            <button class="chip" data-val="gluten">Gluten</button>
+            <button class="chip" data-val="dairy">Dairy</button>
+            <button class="chip" data-val="egg">Egg</button>
+            <button class="chip" data-val="soy">Soy</button>
+            <button class="chip" data-val="peanuts">Peanuts</button>
+            <button class="chip" data-val="tree nuts">Tree Nuts</button>
+            <button class="chip" data-val="fish">Fish</button>
+            <button class="chip" data-val="shellfish">Shellfish</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Biological Sensitivities</label>
+          <div class="chip-group" id="sensitivityGroup">
+            <button class="chip" data-val="lactose_intolerance">Lactose Intolerance</button>
+            <button class="chip" data-val="celiac_disease">Celiac Disease</button>
+            <button class="chip" data-val="g6pd_deficiency">G6PD Deficiency</button>
+            <button class="chip" data-val="phenylketonuria">Phenylketonuria (PKU)</button>
+            <button class="chip" data-val="fructose_malabsorption">Fructose Malabsorption</button>
+            <button class="chip" data-val="histamine_intolerance">Histamine Intolerance</button>
+            <button class="chip" data-val="caffeine_sensitivity">Caffeine Sensitivity</button>
+            <button class="chip" data-val="diabetes_type2">Diabetes Type 2</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Macro Split</label>
+          <div class="macro-grid">
+            <div class="macro-item">
+              <span class="macro-label">Protein</span>
+              <input type="range" id="protein" min="0.10" max="0.50" step="0.05" value="0.30">
+              <span id="proteinValue" class="macro-val">30%</span>
+            </div>
+            <div class="macro-item">
+              <span class="macro-label">Fat</span>
+              <input type="range" id="fat" min="0.10" max="0.50" step="0.05" value="0.25">
+              <span id="fatValue" class="macro-val">25%</span>
+            </div>
+            <div class="macro-item">
+              <span class="macro-label">Carbs</span>
+              <input type="range" id="carbs" min="0.10" max="0.60" step="0.05" value="0.45">
+              <span id="carbsValue" class="macro-val">45%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Recipe Preference (optional)</label>
+          <input type="text" id="query" class="text-input" placeholder="e.g. Mediterranean, Asian, Low-carb...">
+        </div>
+
+        <button id="generateBtn" class="btn-primary">Generate 7-Day Meal Plan</button>
+      </section>
+
+      <!-- results area -->
+      <div id="results" class="results hidden">
+
+        <div id="sensitivityNotes" class="card notes-card hidden">
+          <h2>Dietary Adjustments</h2>
+          <ul id="notesList"></ul>
+        </div>
+
+        <section class="card metrics-card">
+          <h2>Plan Metrics</h2>
+          <div class="metrics-grid" id="metricsGrid"></div>
+        </section>
+
+        <!-- plan / grocery / usda lookup -->
+        <section class="card">
+          <div class="tabs">
+            <button class="tab active" data-tab="plan">7-Day Meal Plan</button>
+            <button class="tab" data-tab="grocery">Grocery List</button>
+            <button class="tab" data-tab="usda">USDA Nutrition Lookup</button>
+          </div>
+
+          <div id="tab-plan" class="tab-content active">
+            <div id="planContainer"></div>
+          </div>
+
+          <div id="tab-grocery" class="tab-content">
+            <ul id="groceryList" class="grocery-list"></ul>
+          </div>
+
+          <div id="tab-usda" class="tab-content">
+            <div class="usda-search">
+              <input type="text" id="usdaQuery" class="text-input" placeholder="Search any food (e.g. chicken breast, banana)...">
+              <button id="usdaSearchBtn" class="btn-secondary">Search USDA</button>
+            </div>
+            <div id="usdaResults"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- loading overlay -->
+      <div id="loading" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Creating your personalized meal plan...</p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Personalized Bio-Chef | Powered by USDA FoodData Central & Edamam API</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
