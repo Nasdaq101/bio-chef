@@ -46,13 +46,64 @@ SENSITIVITY_RULES = {
 
 
 class MealPlanner:
-    def __init__(
-        self,
-        calorie_target: int = DEFAULT_CALORIE_TARGET,
-        macro_split: dict | None = None,
-        allergies: list[str] | None = None,
-        sensitivities: list[str] | None = None,
-    ):
+
+    def refine_plan_for_diversity(self, plan_df: pd.DataFrame, recipe_pool: list[dict], nutrition_tolerance: float = 0.15) -> pd.DataFrame:
+        """
+        Swap out repeated recipes in the plan for unused alternatives with similar nutrition.
+        Args:
+            plan_df: DataFrame of the initial plan (output of generate_plan)
+            recipe_pool: List of all candidate recipes
+            nutrition_tolerance: Fractional tolerance for nutrition similarity (default 15%)
+        Returns:
+            Refined plan DataFrame with improved diversity
+        """
+        plan = plan_df.copy()
+        used_labels = set(plan['recipe'])
+        all_labels = set(r['label'] for r in recipe_pool)
+        unused_labels = all_labels - used_labels
+        # Map label to recipe dict for fast lookup
+        recipe_map = {r['label']: r for r in recipe_pool}
+        # Find repeated recipes
+        repeats = plan['recipe'][plan['recipe'].duplicated()].unique()
+        for rep in repeats:
+            rep_indices = plan.index[plan['recipe'] == rep].tolist()[1:]  # keep first occurrence
+            for idx in rep_indices:
+                target = plan.loc[idx]
+                # Find unused alternatives
+                candidates = []
+                for alt_label in unused_labels:
+                    alt = recipe_map[alt_label]
+                    # Nutrition similarity check
+                    similar = True
+                    for k in ['calories', 'protein', 'fat', 'carbs']:
+                        orig = recipe_map[rep][k]
+                        alt_val = alt[k]
+                        if abs(orig - alt_val) > nutrition_tolerance * max(abs(orig), 1):
+                            similar = False
+                            break
+                    if similar and self._recipe_passes_sensitivity_filter(alt):
+                        candidates.append(alt)
+                if candidates:
+                    # Pick the most similar nutritionally
+                    def nutri_dist(alt):
+                        return sum(abs(recipe_map[rep][k] - alt[k]) for k in ['calories', 'protein', 'fat', 'carbs'])
+                    best_alt = min(candidates, key=nutri_dist)
+                    # Swap in
+                    plan.at[idx, 'recipe'] = best_alt['label']
+                    plan.at[idx, 'calories'] = round(best_alt['calories'])
+                    plan.at[idx, 'protein_g'] = round(best_alt['protein'], 1)
+                    plan.at[idx, 'fat_g'] = round(best_alt['fat'], 1)
+                    plan.at[idx, 'carbs_g'] = round(best_alt['carbs'], 1)
+                    plan.at[idx, 'url'] = best_alt['url']
+                    plan.at[idx, 'image'] = best_alt.get('image', '')
+                    unused_labels.remove(best_alt['label'])
+        return plan
+
+    def __init__(self,
+                 calorie_target: int = DEFAULT_CALORIE_TARGET,
+                 macro_split: dict | None = None,
+                 allergies: list[str] | None = None,
+                 sensitivities: list[str] | None = None):
         self.calorie_target = calorie_target
         self.macro_split = dict(macro_split or DEFAULT_MACRO_SPLIT)
         self.allergies = allergies or []

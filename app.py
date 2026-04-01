@@ -99,6 +99,8 @@ def generate_plan():
         )
 
         plan_df = planner.generate_plan(all_recipes)
+        # Refine plan for diversity (swap repeated recipes)
+        plan_df = planner.refine_plan_for_diversity(plan_df, all_recipes)
         metrics = MealPlanner.evaluate_plan(plan_df, calories)
         grocery_grouped = generate_grocery_list(plan_df, all_recipes)
         grocery_flat = flatten_grocery_list(grocery_grouped)

@@ -68,6 +68,8 @@ def main():
         print(f"[Bio-Chef] {note}")
 
     plan_df = planner.generate_plan(recipes)
+    # Refine plan for diversity (swap repeated recipes)
+    plan_df = planner.refine_plan_for_diversity(plan_df, recipes)
 
     print("\n===== 7-Day Meal Plan =====\n")
     for day in range(1, 8):
